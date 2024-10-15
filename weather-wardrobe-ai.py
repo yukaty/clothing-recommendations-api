@@ -33,16 +33,16 @@ def format_weather_info(data):
     """
     Format the weather information for display and further use.
     """
-    temperature = data['main']['temp']
-    feels_like  = data['main']['feels_like']
-    wind_speed  = data['wind']['speed']
-    description = data['weather'][0]['description']
-    city        = data['name']
-
-    weather_string = f"""
-    The temperature is {temperature}°C in {city}.
-    It is currently {description}, with a wind speed of {wind_speed} m/s.
-    The temperature currently feels like {feels_like}°C.
+    weather_string = f"""Weather data:
+    - City:        {data['name']}
+    - Weather:     {data['weather'][0]['description']}
+    - Temperature: {data['main']['temp']} °C
+    - Feels like:  {data['main']['feels_like']} °C
+    - Humidity:    {data['main']['humidity']} %
+    - Wind speed:  {data['wind']['speed']} m/s
+    - Cloudiness:  {data['clouds']['all']} %
+    - Rain (h/mm): {data['rain']['1h'] if 'rain' in data and '1h' in data['rain'] else 'No rain'}
+    - Snow (h/mm): {data['snow']['1h'] if 'snow' in data and '1h' in data['snow'] else 'No snow'}
     """
     return weather_string
 
@@ -55,7 +55,7 @@ def print_llm_response(prompt, client):
         messages=[
             {
                 "role": "system",
-                "content": "You are a helpful but terse AI assistant who gets straight to the point.",
+                "content": "You are a concise and practical AI assistant who provides clear and actionable advice.",
             },
             {"role": "user", "content": prompt},
         ],
@@ -83,9 +83,11 @@ def main():
 
     # Create a prompt for the LLM
     prompt = f"""
-    Based on the following weather, suggest an appropriate outdoor outfit.
-    Simplify the suggestions with bullet points, like "Wear sunglasses and sunscreen as it's partly cloudy."
-    Forecast: {weather_string}"""
+            Based on the following weather data, suggest an appropriate outdoor outfit.
+            Provide simple and actionable recommendations in bullet points, considering factors like temperature, humidity, wind speed, and precipitation.
+            Example: "Wear sunglasses and sunscreen."
+
+            {weather_string}"""
 
     # Print the LLM response
     client = OpenAI(api_key=api_keys['openai_api_key'])
