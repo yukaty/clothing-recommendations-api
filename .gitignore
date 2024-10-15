@@ -1,0 +1,11 @@
+# Virtual environment folder
+venv/
+
+# Python cache files
+__pycache__/
+
+# Configuration file
+.env
+
+# Ignore other temporary or backup files
+.DS_Store

@@ -1,0 +1,6 @@
+# OpenWeatherMap: https://openweathermap.org/current
+weather_api_url: "https://api.openweathermap.org/data/2.5/weather"
+
+# Calgary
+latitude: 51.04999
+longitude: -114.0666
