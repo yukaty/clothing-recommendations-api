@@ -3,6 +3,10 @@ import requests
 import yaml
 from openai import OpenAI
 from dotenv import load_dotenv
+from flask import Flask, request, jsonify
+
+# Initialize a Flask app
+app = Flask(__name__)
 
 def load_config(config_file='config.yaml'):
     """
@@ -46,9 +50,9 @@ def format_weather_info(data):
     """
     return weather_string
 
-def print_llm_response(prompt, client):
+def get_llm_response(prompt, client):
     """
-    Get and print the response from the LLM for a given prompt.
+    Get and return the response from the LLM for a given prompt.
     """
     completion = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -61,25 +65,29 @@ def print_llm_response(prompt, client):
         ],
         temperature=0.0,
     )
-    response = completion.choices[0].message.content
-    print(response)
+    return completion.choices[0].message.content
 
-def main():
+@app.route('/weather_and_outfit', methods=['POST'])
+def get_weather_and_outfit():
     # Load configuration and API keys
     config = load_config()
     api_keys = load_api_keys()
+
+    # Get parameters from user input or use config defaults
+    data = request.get_json()
+    latitude = data.get('latitude', config['latitude'])
+    longitude = data.get('longitude', config['longitude'])
 
     # Get weather information
     weather_data = get_weather_info(
         config['weather_api_url'],
         api_keys['weather_api_key'],
-        config['latitude'],
-        config['longitude']
+        latitude,
+        longitude
     )
 
-    # Format and print weather information
+    # Format weather information
     weather_string = format_weather_info(weather_data)
-    print(weather_string)
 
     # Create a prompt for the LLM
     prompt = f"""
@@ -89,9 +97,12 @@ def main():
 
             {weather_string}"""
 
-    # Print the LLM response
+    # Call OpenAI API
     client = OpenAI(api_key=api_keys['openai_api_key'])
-    print_llm_response(prompt, client)
+    response = get_llm_response(prompt, client)
+
+    # Return the combined response
+    return jsonify({'weather_info': weather_string, 'recommendation': response})
 
 if __name__ == "__main__":
-    main()
+    app.run(debug=True)
