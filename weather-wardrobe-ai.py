@@ -31,9 +31,22 @@ def get_weather_info(weather_api_url, api_key, latitude, longitude):
     try:
         response = requests.get(url)
         response.raise_for_status()
-        return response.json(), None
+        data = response.json()
+
+        weather_data = {
+            'city': data['name'],
+            'weather': data['weather'][0]['description'],
+            'temperature': data['main']['temp'],
+            'feels_like': data['main']['feels_like'],
+            'humidity': data['main']['humidity'],
+            'wind_speed': data['wind']['speed'],
+            'cloudiness': data['clouds']['all'],
+            'rain': data.get('rain', {}).get('1h', 'No rain'),
+            'snow': data.get('snow', {}).get('1h', 'No snow')
+        }
+        return weather_data
     except requests.exceptions.RequestException as e:
-        return {}, str(e)
+        return {'error': str(e)}
 
 
 def format_weather_info(data):
@@ -42,15 +55,15 @@ def format_weather_info(data):
     """
     try:
         return f"""Weather data:
-    - City:        {data['name']}
-    - Weather:     {data['weather'][0]['description']}
-    - Temperature: {data['main']['temp']} °C
-    - Feels like:  {data['main']['feels_like']} °C
-    - Humidity:    {data['main']['humidity']} %
-    - Wind speed:  {data['wind']['speed']} m/s
-    - Cloudiness:  {data['clouds']['all']} %
-    - Rain (h/mm): {data.get('rain', {}).get('1h', 'No rain')}
-    - Snow (h/mm): {data.get('snow', {}).get('1h', 'No snow')}
+        - City:        {data['city']}
+        - Weather:     {data['weather']}
+        - Temperature: {data['temperature']} °C
+        - Feels like:  {data['feels_like']} °C
+        - Humidity:    {data['humidity']} %
+        - Wind speed:  {data['wind_speed']} m/s
+        - Cloudiness:  {data['cloudiness']} %
+        - Rain (h/mm): {data['rain']}
+        - Snow (h/mm): {data['snow']}
     """
     except KeyError:
         return "Invalid weather data received."
@@ -66,7 +79,9 @@ def get_llm_response(prompt, client):
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a concise and practical AI assistant who provides clear and actionable advice.",
+                    "content": "You are a knowledgeable and approachable weather forecaster. \
+                                Your goal is to provide concise and practical advice on appropriate clothing and weather preparedness. \
+                                Ensure that your recommendations are easy for anyone to understand and implement."
                 },
                 {"role": "user", "content": prompt},
             ],
@@ -89,7 +104,7 @@ def get_weather_and_outfit():
         return jsonify({'error': 'Missing configuration or API keys.'}), 500
 
     # Get parameters from user input or use config defaults
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
     latitude = data.get('latitude', config.get('latitude'))
     longitude = data.get('longitude', config.get('longitude'))
 
@@ -97,11 +112,11 @@ def get_weather_and_outfit():
         return jsonify({'error': 'Latitude and longitude must be provided.'}), 400
 
     # Get weather information
-    weather_data, weather_error = get_weather_info(
+    weather_data = get_weather_info(
         weather_api_url, weather_api_key, latitude, longitude
     )
-    if weather_error:
-        return jsonify({'error': f'Failed to fetch weather data: {weather_error}'}), 500
+    if 'error' in weather_data:
+        return jsonify({'error': f'Failed to fetch weather data: {weather_data['error']}'}), 500
 
     # Format weather information
     weather_string = format_weather_info(weather_data)
@@ -122,7 +137,7 @@ def get_weather_and_outfit():
         return jsonify({'error': f'Failed to fetch LLM response: {llm_error}'}), 500
 
     # Return the combined response
-    return jsonify({'weather_info': weather_string, 'recommendation': response})
+    return jsonify({'weather_info': weather_data, 'recommendation': response})
 
 
 if __name__ == "__main__":
