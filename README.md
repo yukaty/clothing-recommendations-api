@@ -1,7 +1,5 @@
 # Weather Wardrobe AI
-This is an API that provides personalized outdoor outfit recommendations based on the current weather conditions.
-
-This project was created as a learning exercise to explore the use of OpenAI API and Flask.
+This API offers personalized outdoor outfit recommendations based on current weather. It was developed as a learning project to explore OpenAI API and Flask.
 
 ## Setup
 1. Clone the repository
