@@ -1,11 +1,11 @@
-# Weather Wardrobe AI
+# Clothing Recommendations API
 This API offers personalized outdoor outfit recommendations based on current weather. It was developed as a learning project to explore OpenAI API and Flask.
 
 ## Setup
 1. Clone the repository
    ```sh
-   git clone https://github.com/yukaty/weather-wardrobe-ai.git
-   cd weather-wardrobe-ai
+   git clone https://github.com/yukaty/clothing-recommendations-api.git
+   cd clothing-recommendations-api
    ```
 
 2. Create a virtual environment
@@ -22,13 +22,13 @@ This API offers personalized outdoor outfit recommendations based on current wea
 4. Update configuration files
   - Create a `.env` file in the project root with the following keys:
      ```
-     OPENAI_API_KEY=your_openai_api_key
-     WEATHER_API_KEY=your_weather_api_key
+     OPENAI_API_KEY=your_openai_api_key   # platform.openai.com
+     WEATHER_API_KEY=your_weather_api_key # openweathermap.org
      ```
 
 5. Run the server
     ```sh
-    python weather-wardrobe-ai.py
+    python main.py
     ```
 
 ## cURL Example
