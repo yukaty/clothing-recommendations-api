@@ -1,6 +1,31 @@
 # OpenWeatherMap: https://openweathermap.org/current
 weather_api_url: "https://api.openweathermap.org/data/2.5/weather"
 
-# Calgary
-latitude: 51.04999
-longitude: -114.0666
+# Default: Calgary
+default_latitude: 51.04999
+default_longitude: -114.0666
+
+# Prompt
+prompt_template: |
+  Based on the following weather data, provide a list of clothing recommendations in JSON array format.
+  Each item should include:
+    - "category": category like "Top", "Bottoms", "Footwear", or "Accessories".
+    - "recommendation": specific advice based on weather conditions.
+
+  Weather data:
+  - City: {city}
+  - Weather: {weather}
+  - Temperature: {temperature} °C
+  - Feels like: {feels_like} °C
+  - Humidity: {humidity} %
+  - Wind speed: {wind_speed} m/s
+  - Cloudiness: {cloudiness} %
+  - Rain (h/mm): {rain}
+  - Snow (h/mm): {snow}
+
+  Respond in JSON array format only:
+  [
+      {{ "category": "Top", "recommendation": "Wear a long-sleeve shirt under a jacket." }},
+      {{ "category": "Bottoms", "recommendation": "Opt for long pants, such as jeans or trousers." }},
+      ...
+  ]
